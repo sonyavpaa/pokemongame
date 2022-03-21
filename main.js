@@ -2,11 +2,12 @@ const pokemons = document.querySelectorAll(".pokemon");
 const pokedex = document.querySelector("#pokedex");
 const h1 = document.querySelector("h1");
 const paragraphs = document.querySelectorAll("p");
+const searchBar = document.querySelector("input");
 
 let pokemonArr = [];
 
 const fetchData = () => {
-  fetch("https://pokeapi.co/api/v2/pokemon?limit=30&offset=0")
+  fetch("https://pokeapi.co/api/v2/pokemon?limit=151&offset=0")
     .then((res) => res.json())
     .then((data) => {
       console.log("fetch results", data);
@@ -24,18 +25,24 @@ const pokeCards = (data) => {
 
   const cards = data
     .map((card) => {
-      let types = card?.types;
-      console.log(types);
+      pokemonArr.push(card);
+      const types = card?.types
+        .map((type) => {
+          return type?.type?.name;
+        })
+        .join(", ");
+
       return `<div class="pokemon">
     <a href=""
       ><img src="${card?.sprites.front_default}" alt="${card?.name}" />
-      <p>${card?.name}</br><span>types:</span></p></a
+      <p>${card?.name}</br><span>types: ${types}</span></p></a
     >
   </div>`;
     })
     .join("");
   pokedex.innerHTML = cards;
 };
+
 // changes if mobile
 window.mobileCheck = function () {
   let check = false;
@@ -73,3 +80,26 @@ if (isTablet === true) {
 }
 
 fetchData();
+
+searchBar.addEventListener("keyup", (e) => {
+  const value = searchBar.value.toLowerCase();
+  const cards = pokemonArr
+    .map((pokemon) => {
+      if (pokemon?.name.includes(value)) {
+        const types = pokemon?.types
+          .map((type) => {
+            return type?.type?.name;
+          })
+          .join(", ");
+
+        return `<div class="pokemon">
+      <a href=""
+        ><img src="${pokemon?.sprites.front_default}" alt="${pokemon?.name}" />
+        <p>${pokemon?.name}</br><span>types: ${types}</span></p></a
+      >
+    </div>`;
+      }
+    })
+    .join("");
+  pokedex.innerHTML = cards;
+});
